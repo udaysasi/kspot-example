@@ -41,4 +41,4 @@ This repository contains basic application - serverside in nodejs and ui in Angu
 
 ### Who do I talk to?
 
-- [Uday](mailto:udaysasi@gmail.com)
+- [Uday](mailto:uday@kloudspot.com)

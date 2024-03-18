@@ -16,7 +16,7 @@
     "crypto-js": "^4.1.1",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
-    "kloudspot-analytics-node-sdk": "^1.0.8",
+    "kloudspot-analytics-node-sdk": "^1.0.9",
     "log4js": "^6.1.0",
     "moment": "^2.29.4",
     "twilio": "^3.39.2"

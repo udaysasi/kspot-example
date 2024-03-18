@@ -5,7 +5,8 @@ const router = express.Router();
 const mathController = require('./controllers/math');
 const aviationController = require('./controllers/aviation');
 
-const KloudspotInsights = require('/Users/uday/jamesonworkspace/kloudspot-analytics-node-sdk/lib/KloudspotInsights');
+//const KloudspotInsights = require('/Users/uday/jamesonworkspace/kloudspot-analytics-node-sdk/lib/KloudspotInsights');
+const KloudspotInsights = require('kloudspot-analytics-node-sdk');
 
 const ksClient = new KloudspotInsights({
     'host': 'https://gmr-dev.kloudspot.com:8443/advanced',

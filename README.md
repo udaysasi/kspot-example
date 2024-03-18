@@ -1,13 +1,12 @@
 # README
 
-This is a project created to solve the daily problem of Collaborating and Scheduling meetings and gatherings. A lot of time is wasted to find a common time to meet/gather when a lot of people are involved. The matters get worse when trying to find a common time a bunch of students are available. [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
 
 ### What does this repository contain?
 
 This repository contains basic application - serverside in nodejs and ui in Angular 14. The code structure is as follows:
 
 - src --> contains all controllers written in nodejs. This will serve the API endpoints
-- ui --> An angular 14 admin template [Link](https://preview.themeforest.net/item/fuse-angularjs-material-design-admin-template/full_screen_preview/12931855) that contains the basic components for typical UI development. This folder conatins its own `package.json` that contains all dependencies required to run the Angular project
+- ui --> An angular 14 application that contains the basic components for typical UI development. This folder contains its own `package.json` that contains all dependencies required to run the Angular project
 - `package.json` with all server side dependencies
 - `server.js` file that kickstarts the application
 

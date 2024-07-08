@@ -1,4 +1,34 @@
 <div class="sample-wrapper">
-<h1>Bookloads for today:</h1><br>
-{{bookloadsData | json}}
+	<div *ngIf="error">Error fetching the location data from KloudInsights</div>
+	<div *ngIf="!error">
+		<!--
+		<h1>List of sites:</h1><br>
+		{{sitesData | json}}
+		-->
+		<h1>Location Information:</h1><br>
+		<div>The data displayed below is retrieved using the KloudInsights Node SDK. This SDK resides on the server and establishes communication to the configured KloudInsights instance. In this example below, a list of all Sites configured on the KloudInsights instance is retrieved and displayed as a table. </div><br>
+		
+		<table id="site-table">
+			<tr>
+				<th>No.</th>
+				<th>Name</th>
+				<th>Address</th>
+				<th>Floors</th>
+				<th>Timezone</th>
+			</tr>
+			
+			 <tr *ngFor="let item of sitesData; let i=index">
+		        <td>{{i+1}}</td>
+		        <td>{{item.fullName}}</td>
+		        <td>{{item.address}}</td>
+		        <td>{{item.children.length}}</td>
+		        <td>{{item.timeZoneId}}</td>
+		    </tr>
+		    
+		</table>
+		
+		<br><div>For a list of all suported operations and capabilities of the SDK, please refer to the documentation <a href="https://stage.kloudspot.com/kloudinsights-nodesdk-docs/SiteHierarchy.html" target="new" class="link">here</a></div><br>
+		
+	</div>
+
 </div>

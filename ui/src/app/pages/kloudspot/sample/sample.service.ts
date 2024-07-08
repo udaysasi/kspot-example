@@ -10,8 +10,8 @@ export class SampleService {
 	constructor(private http: HttpClient) {
 	}
 
-	public getBookloads() {
-		const url = `/api/v1/aviation/bookloads`;
+	public getSites() {
+		const url = `/api/v1/location/sites`;
 		return this.http.get(url);
 	}
 

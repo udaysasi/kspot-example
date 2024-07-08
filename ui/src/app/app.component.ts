@@ -47,7 +47,7 @@ export class AppComponent {
         customClass: 'first-subheading'
       }, 
       {
-        name: 'Sample',
+        name: 'Kloudspot Locations',
         routeOrFunction: '/kloudspot/sample',
         icon: 'dashboard',
         position: 1,

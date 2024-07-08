@@ -1,3 +1,19 @@
 .sample-wrapper {
 	padding: 2rem;
+	
+	#site-table {
+		border-collapse: collapse;
+		tr {
+			th {
+				text-align: left;
+				background-color: #1A76D2;
+				color: white;
+				padding: 6px;
+			}
+		}
+	}
+	
+	.link {
+		color: #1A76D2;
+	}
 }

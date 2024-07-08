@@ -15,11 +15,14 @@
     "axios": "^0.27.2",
     "crypto-js": "^4.1.1",
     "express": "^4.17.1",
+    "http-proxy-middleware": "3.0.1-beta.0",
     "jsonwebtoken": "^8.5.1",
     "kloudspot-analytics-node-sdk": "^1.0.9",
     "log4js": "^6.1.0",
     "moment": "^2.29.4",
-    "twilio": "^3.39.2"
+    "sockjs": "^0.3.24",
+    "twilio": "^3.39.2",
+    "ws": "^8.17.0"
   },
   "devDependencies": {
     "@types/body-parser": "^1.19.2",

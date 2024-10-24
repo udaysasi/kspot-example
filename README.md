@@ -8,7 +8,7 @@ This repository contains basic application - serverside in nodejs and ui in Angu
 - src --> contains all controllers written in nodejs. This will serve the API endpoints
 - ui --> An angular 14 application that contains the basic components for typical UI development. This folder contains its own `package.json` that contains all dependencies required to run the Angular project
 - `package.json` with all server side dependencies
-- `server.js` file that kickstarts the application
+- `server.js` file that kickstarts the application and creates a HTTP server and a Websocket server to retrieve data
 
 ### How do I get set up for development?
 

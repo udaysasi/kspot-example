@@ -1,16 +1,135 @@
 const express = require('express');
-const WebSocket = require('ws');
-const http = require('http');
 const app = express();
+const WebSocket = require('ws');
+const Stomp = require('stompjs');
 const bodyParser = require("body-parser");
 const routes = require("./server/routes");
 const config = require('./server/config/config');
-
 const prodMode = config.prodMode;
-const port = config.serverPort || 3080;
-const wss = new WebSocket.Server({ port: 3090 });
 
-const externalServerUrl = 'wss://walker.kloudspot.com/advanced/websocket';
+const port = config.serverPort || 3080;
+const wsport = config.websocketPort || 3090;
+const externalServerUrl = 'ws://walker.internal.kloudspot.com:32080/advanced/websocket';
+
+class StompProxy {
+	constructor() {
+		this.stompClient = null;
+		this.connections = {};
+	}
+
+	connectToExternalServer() {
+		this.stompClient = Stomp.over(new WebSocket(externalServerUrl, [], {
+			"headers": {
+				"Authorization": "Bearer YDAUJ7FODX7OLSV"
+			}
+		}));
+
+		this.stompClient.connect({}, () => {
+			console.log('Connected to external STOMP server');
+		}, (error) => {
+			console.error('STOMP connection error:', error);
+		});
+	}
+
+	startWebSocketServer(port) {
+		const wss = new WebSocket.Server({ port });
+		console.log(`WebSocket server is running on ws://localhost:${port}`);
+
+		wss.on('connection', (ws) => {
+			console.log('New WebSocket connection established');
+			const stompClient = this.stompClient;
+			const subscriptions = new Map(); // Map to track subscriptions by ID
+
+			ws.on('message', (message) => {
+				let messageStr;
+				if (typeof message !== 'string') {
+					// Convert binary data to a string
+					messageStr = message.toString();
+				} else {
+					messageStr = message;
+				}
+
+				// Parse the STOMP frame
+				const lines = messageStr.split('\n');
+				const command = lines[0].trim();
+				const headers = {};
+				let body = null;
+
+				// Parse headers
+				for (let i = 1; i < lines.length; i++) {
+					const line = lines[i].trim();
+					if (line === '') {
+						// An empty line indicates the start of the body
+						body = lines.slice(i + 1).join('\n').trim();
+						break;
+					}
+					const [key, value] = line.split(':');
+					headers[key] = value;
+				}
+				console.log(headers);
+
+				// Handle different STOMP commands
+				switch (command) {
+					case 'CONNECT':
+						// Respond to the CONNECT command with a CONNECTED frame
+						ws.send(`CONNECTED\nversion:1.2\nheart-beat:0,0\n\n\0`);
+						break;
+					case 'SUBSCRIBE':
+						const destination = headers.destination;
+						const subscriptionId = headers.id;
+						if (destination && stompClient) {
+							const subscription = stompClient.subscribe(destination, (frame) => {
+								console.log("Sending data to the client", frame.body);
+								//ws.send(`MESSAGE\ndestination:${destination}\nsubscription:${subscriptionId}\n\n${frame.body}\0`);
+								ws.send(`MESSAGE\ndestination:${destination}\nsubscription:${subscriptionId}\ncontent-type:application/json\ncontent-length:${frame.body.length}\n\n${frame.body}\0`); // Relay the message back to the browser
+							});
+							// Store the subscription by ID
+							subscriptions.set(subscriptionId, subscription);
+							ws.send(`SUBSCRIBED\ndestination:${destination}\n\n\0`);
+						}
+						break;
+					case 'UNSUBSCRIBE':
+						const unsubId = headers.id;
+						if (unsubId && subscriptions.has(unsubId)) {
+							// Unsubscribe and remove the subscription from the map
+							subscriptions.get(unsubId).unsubscribe();
+							subscriptions.delete(unsubId);
+							ws.send(`UNSUBSCRIBED\nid:${unsubId}\n\n\0`);
+						} else {
+							console.error('No subscription found for ID:', unsubId);
+							ws.send(`ERROR\nmessage:No subscription found for ID ${unsubId}\n\n\0`);
+						}
+						break;
+					case 'SEND':
+						const sendDestination = headers.destination;
+						console.log('SEND body', body);
+						if (sendDestination && stompClient) {
+							stompClient.send(sendDestination, {}, body);
+						}
+						break;
+					default:
+						console.error('Unsupported STOMP command:', command);
+						ws.send(`ERROR\nmessage:Unsupported STOMP command\n\n\0`);
+				}
+			});
+
+			ws.on('close', () => {
+				console.log('WebSocket connection closed');
+				// Unsubscribe all subscriptions when the WebSocket connection is closed
+				subscriptions.forEach((subscription, id) => {
+					subscription.unsubscribe();
+				});
+				subscriptions.clear();
+			});
+		});
+
+	}
+
+	run(port) {
+		this.connectToExternalServer();
+		this.startWebSocketServer(port);
+	}
+}
 
 app.use(bodyParser.json());
 
@@ -20,65 +139,16 @@ app.use(express.static(process.cwd() + "/ui/dist/kspot-example-ui/"));
 app.use('/api/v1', routes);
 
 app.get('/', (req, res) => {
-  res.sendFile(process.cwd() + "/ui/dist/kspot-example-ui/index.html")
+	res.sendFile(process.cwd() + "/ui/dist/kspot-example-ui/index.html")
 });
 
 if (prodMode) {
 	app.use(express.static("ui/dist/kspot-example-ui"));
 }
 
-// Handle WebSocket connections
-wss.on('connection', (ws, req) => {
-    // Create a WebSocket connection to the external server
-    const externalSocket = new WebSocket(externalServerUrl);
-
-	externalSocket.on('open', (evt) => {
-		console.error('externalSocket open:', evt);
-  		// Send the header with the bearer token
-  		externalSocket.send('Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI2MWlodnRsZ2NkaXVsdDExbGhqdGNhX2dod2tjN2I3bGN5dGFzbHJwYmF1IiwiYXV0aCI6IlJPTEVfQURNSU4iLCJpZCI6IjY1MTczMmY0MTE2ZDRlNWYyNWYzYzA4NSIsImV4cCI6MTcxNjQxMjg3MX0.RfHHj5jTTo6Q5d3Ev2wKfxoW6JLa4dWqjQSspPSaltucyliHDZ8BBFzwO4B_2bJiavi_psWyvXw-o7Eogsevwg');
-	});
-
-    // Handle messages from the client and send them to the external server
-    ws.on('message', (message) => {
-		console.error('message on ws:', message);
-        if (externalSocket.readyState === WebSocket.OPEN) {
-            externalSocket.send(message);
-        }
-    });
-
-    // Handle messages from the external server and send them to the client
-    externalSocket.on('message', (message) => {
-		console.error('message on externalSocket:', message);
-        if (ws.readyState === WebSocket.OPEN) {
-            ws.send(message);
-        }
-    });
-
-    // Handle connection close from the client
-    ws.on('close', (evt) => {
-		console.error('ws close:', evt);
-        externalSocket.close();
-    });
-
-    // Handle connection close from the external server
-    externalSocket.on('close', (evt) => {
-		console.error('externalSocket close:', evt);
-        ws.close();
-    });
-
-    // Handle errors
-    ws.on('error', (error) => {
-        console.error('WebSocket error on client connection:', error);
-        externalSocket.close();
-    });
-
-    externalSocket.on('error', (error) => {
-        console.error('WebSocket error on external connection:', error);
-        ws.close();
-    });
-});
-
-
 app.listen(port, () => {
-  console.log(`Server listening on the port::${port}`);
+	console.log(`Server listening on the port::${port}`);
 });
+
+const proxy = new StompProxy();
+proxy.run(wsport);

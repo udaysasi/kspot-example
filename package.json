@@ -12,6 +12,7 @@
   "author": "Uday Pyda",
   "homepage": "https://www.kloudspot.com",
   "dependencies": {
+    "@stomp/stompjs": "^7.0.0",
     "axios": "^0.27.2",
     "crypto-js": "^4.1.1",
     "express": "^4.17.1",
@@ -21,6 +22,7 @@
     "log4js": "^6.1.0",
     "moment": "^2.29.4",
     "sockjs": "^0.3.24",
+    "stompjs": "^2.3.3",
     "twilio": "^3.39.2",
     "ws": "^8.17.0"
   },

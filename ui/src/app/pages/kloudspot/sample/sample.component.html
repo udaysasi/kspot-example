@@ -5,7 +5,7 @@
 		<h1>List of sites:</h1><br>
 		{{sitesData | json}}
 		-->
-		<h1>Location Information:</h1><br>
+		<h1>Location Information (via API):</h1>
 		<div>The data displayed below is retrieved using the KloudInsights Node SDK. This SDK resides on the server and establishes communication to the configured KloudInsights instance. In this example below, a list of all Sites configured on the KloudInsights instance is retrieved and displayed as a table. </div><br>
 		
 		<table id="site-table">
@@ -28,7 +28,10 @@
 		</table>
 		
 		<br><div>For a list of all suported operations and capabilities of the SDK, please refer to the documentation <a href="https://stage.kloudspot.com/kloudinsights-nodesdk-docs/SiteHierarchy.html" target="new" class="link">here</a></div><br>
-		
+		<hr>
+		<h1>Alert Notifictaions (from Web socket):</h1>
+		<div>The data displayed below is retrieved over web socket:<br>
+		<div *ngFor="let message of messages; let i=index" style="border: 1px solid lightgrey; color: saddlebrown; padding: 12px; margin-bottom: 10px; word-wrap: break-word;">{{message}}</div>
 	</div>
 
 </div>
